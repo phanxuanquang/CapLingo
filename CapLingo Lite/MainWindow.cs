@@ -1,4 +1,5 @@
-using Capcut_Helpers;
+using Domains;
+using Utilities;
 
 namespace CapLingo_Lite
 {
@@ -21,7 +22,7 @@ namespace CapLingo_Lite
             {
                 try
                 {
-                    _subtitles = await Ulti.GetSubtittleAsync(openFileDialog.FileName);
+                    _subtitles = await Utilities.CapcutHelper.GetSubtittleAsync(openFileDialog.FileName);
                     DraftContentFilePath_TextBox.Text = openFileDialog.FileName;
                     DialoguesTable.DataSource = _subtitles;
                     ExportSrt_Btn.Enabled = EnableMinimizeSubtitle_Checkbox.Enabled = _subtitles != null && _subtitles.Count > 0;
@@ -48,18 +49,20 @@ namespace CapLingo_Lite
 
             if (EnableMinimizeSubtitle_Checkbox.Checked)
             {
-                subtitles = Ulti.MinimizeContent(subtitles);
+                subtitles = SubtittleHelper.MinimizeDialogues(subtitles);
             }
 
             using SaveFileDialog saveFileDialog = new();
             saveFileDialog.Filter = "SRT files (*.srt)|*.srt";
             saveFileDialog.RestoreDirectory = true;
+            saveFileDialog.DefaultExt = "srt";
+            saveFileDialog.FileName = $"{DateTime.Now.Ticks}.srt";
 
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
                 try
                 {
-                    await Ulti.ExportSubtittleAsync(subtitles, saveFileDialog.FileName);
+                    await SubtittleHelper.ExportAsync(subtitles, saveFileDialog.FileName);
                     MessageBox.Show("Subtitles exported successfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)

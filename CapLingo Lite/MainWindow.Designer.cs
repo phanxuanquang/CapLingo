@@ -64,9 +64,9 @@
             EnableMinimizeSubtitle_Checkbox.Enabled = false;
             EnableMinimizeSubtitle_Checkbox.Location = new Point(37, 848);
             EnableMinimizeSubtitle_Checkbox.Name = "EnableMinimizeSubtitle_Checkbox";
-            EnableMinimizeSubtitle_Checkbox.Size = new Size(256, 29);
+            EnableMinimizeSubtitle_Checkbox.Size = new Size(186, 29);
             EnableMinimizeSubtitle_Checkbox.TabIndex = 2;
-            EnableMinimizeSubtitle_Checkbox.Text = "Merge interrupted dialogue";
+            EnableMinimizeSubtitle_Checkbox.Text = "Cleanup Dialogues";
             EnableMinimizeSubtitle_Checkbox.UseVisualStyleBackColor = true;
             // 
             // DialoguesTable

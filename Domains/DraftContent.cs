@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Capcut_Helpers
+namespace Domains
 {
     public class CanvasConfig
     {
@@ -1315,6 +1315,4 @@ namespace Capcut_Helpers
         [JsonProperty("text")]
         public List<string> Text;
     }
-
-
 }

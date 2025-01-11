@@ -1,12 +1,9 @@
 ﻿namespace Translator.Models
 {
-    public class ResponseSchema
+    public class VideoAnalysis
     {
-        [Required]
+        public string VideoLanguage { get; set; }
         public List<Chapter> Chapters { get; set; }
-        [Required]
         public List<Character> Characters { get; set; }
-        [Required]
-        public string PlotSetting { get; set; }
     }
 }

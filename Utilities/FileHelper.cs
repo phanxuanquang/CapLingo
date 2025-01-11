@@ -1,4 +1,4 @@
-﻿namespace Capcut_Helpers
+﻿namespace Utilities
 {
     public static class FileHelper
     {

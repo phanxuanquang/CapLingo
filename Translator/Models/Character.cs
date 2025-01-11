@@ -1,4 +1,6 @@
-﻿namespace Translator.Models
+﻿using Domains;
+
+namespace Translator.Models
 {
     public class Character
     {

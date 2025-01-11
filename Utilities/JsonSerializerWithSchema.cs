@@ -1,38 +1,26 @@
-﻿using Newtonsoft.Json;
-using System.Collections;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Reflection;
-using Translator.Models;
-using Formatting = Newtonsoft.Json.Formatting;
 
-namespace Translator
+namespace Utilities
 {
-    public static class OpenApiSchemaGenerator
+    public class JsonSerializerWithSchema
     {
-        public static string GenerateSchema(Type type)
+        public static object GenerateSchema(Type type)
         {
-            var schema = new Dictionary<string, object>
+            return new
             {
-                ["type"] = "object",
-                ["properties"] = GenerateProperties(type),
-                ["required"] = GetRequiredProperties(type)
+                type = "object",
+                properties = GenerateProperties(type),
+                required = GetRequiredProperties(type)
             };
-
-            return JsonConvert.SerializeObject(new { responseSchema = schema }, Formatting.Indented);
         }
 
-        private static Dictionary<string, object> GenerateProperties(Type type)
+        private static object GenerateProperties(Type type)
         {
-            var properties = new Dictionary<string, object>();
-
-            foreach (var property in type.GetProperties())
-            {
-                var propertyType = property.PropertyType;
-
-                // Kiểm tra kiểu dữ liệu và ánh xạ sang OpenAPI schema
-                properties[property.Name] = MapTypeToSchema(propertyType);
-            }
-
-            return properties;
+            return type.GetProperties().ToDictionary(
+                property => property.Name,
+                property => MapTypeToSchema(property.PropertyType)
+            );
         }
 
         private static object MapTypeToSchema(Type propertyType)
@@ -58,12 +46,11 @@ namespace Translator
                 return new
                 {
                     type = "string",
-                    @enum = Enum.GetNames(propertyType) // Lấy danh sách giá trị enum
+                    @enum = Enum.GetNames(propertyType)
                 };
             }
-            else if (propertyType.IsArray || typeof(IEnumerable).IsAssignableFrom(propertyType) && propertyType != typeof(string))
+            else if (propertyType.IsArray || typeof(IEnumerable<>).IsAssignableFrom(propertyType))
             {
-                // Mảng hoặc danh sách
                 var elementType = propertyType.IsArray ? propertyType.GetElementType() : propertyType.GetGenericArguments().FirstOrDefault();
                 return new
                 {
@@ -73,7 +60,6 @@ namespace Translator
             }
             else if (propertyType.IsClass && propertyType != typeof(string))
             {
-                // Đối tượng phức tạp
                 return new
                 {
                     type = "object",
@@ -83,19 +69,16 @@ namespace Translator
             }
             else
             {
-                // Kiểu dữ liệu không xác định, giả sử là chuỗi
                 return new { type = "string" };
             }
         }
 
         private static List<string> GetRequiredProperties(Type type)
         {
-            // Lấy danh sách các thuộc tính được đánh dấu là required
             return type.GetProperties()
                        .Where(p => p.GetCustomAttribute<RequiredAttribute>() != null)
                        .Select(p => p.Name)
                        .ToList();
         }
     }
-
 }
