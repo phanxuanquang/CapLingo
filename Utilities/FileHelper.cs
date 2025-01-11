@@ -39,5 +39,10 @@
                 throw new IOException($"Failed to write file", ex);
             }
         }
+
+        public static string GetVideoMimeType(string path)
+        {
+            return "video/mp4";
+        }
     }
 }

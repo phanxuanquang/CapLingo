@@ -1,10 +1,12 @@
 ﻿using GenAI.Models;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Text;
+using Utilities;
 
 namespace GenAI
 {
-    public static class Generator
+    public static class Gemini
     {
         public const string ApiKeySite = "https://aistudio.google.com/app/apikey";
         public const string ApiKeyPrefix = "AIzaSy";
@@ -18,7 +20,7 @@ namespace GenAI
             var endpoint = $"https://generativelanguage.googleapis.com/v1beta/models/{modelName}:generateContent?key={ApiKey}";
 
             var request = responseType != null
-                ? JsonSerializerWithSchema.Serialize(systemInstruction, prompt, responseType, creativityLevel)
+                ? BuildRequest(systemInstruction, prompt, responseType, creativityLevel)
                 : new
                 {
                     contents = new[]
@@ -73,9 +75,42 @@ namespace GenAI
             response.EnsureSuccessStatusCode();
 
             var responseData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            var responseDTO = JsonConvert.DeserializeObject<ApiResponseDto.Response>(responseData);
 
-            return responseDTO.Candidates[0].Content.Parts[0].Text;
+            return JObject.Parse(responseData).SelectToken("$.candidates[0].content.parts[0].text")?.ToString();
+        }
+
+        public static async Task<string> GenerateContentFromVideo(string fileUri)
+        {
+            using var client = new HttpClient();
+
+            var parts = new List<Part>
+            {
+                new() {
+                    file_data = new FileData
+                    {
+                        mime_type = FileHelper.GetVideoMimeType(fileUri),
+                        file_uri = fileUri
+                    }
+                }
+            };
+
+            var requestData = new
+            {
+                contents = new[]
+                {
+                    new Content
+                    {
+                        parts = parts
+                    }
+                }
+            };
+
+            var jsonContent = new StringContent(JObject.FromObject(requestData).ToString(), Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync($"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={ApiKey}", jsonContent);
+            var responseJson = await response.Content.ReadAsStringAsync();
+
+            return JObject.Parse(responseJson).SelectToken("$.candidates[0].content.parts[0].text")?.ToString();
         }
 
         public static bool CanBeGeminiApiKey()
@@ -85,6 +120,7 @@ namespace GenAI
                 return true;
             }
 
+            ApiKey = string.Empty;
             return false;
         }
 
@@ -97,9 +133,49 @@ namespace GenAI
             }
             catch
             {
+                ApiKey = string.Empty;
                 return false;
             }
         }
 
+        public static object BuildRequest(string systemInstruction, string prompt, Type responseType, CreativityLevel creativityLevel = CreativityLevel.Medium)
+        {
+            var schema = JsonSerializerWithSchema.GenerateSchema(responseType);
+
+            var result = new
+            {
+                systemInstruction = new
+                {
+                    parts = new[]
+                    {
+                        new
+                        {
+                            text = systemInstruction,
+                        }
+                    }
+                },
+                contents = new[]
+                {
+                    new
+                    {
+                        role = "user",
+                        parts = new[]
+                        {
+                            new { text = prompt }
+                        }
+                    }
+                },
+                generationConfig = new
+                {
+                    temperature = (double)creativityLevel / 100,
+                    topK = 40,
+                    topP = 0.95,
+                    responseMimeType = "application/json",
+                    responseSchema = schema
+                }
+            };
+
+            return result;
+        }
     }
 }

@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Domains\Domains.csproj" />
+    <ProjectReference Include="..\Utilities\Utilities.csproj" />
   </ItemGroup>
 
 </Project>
