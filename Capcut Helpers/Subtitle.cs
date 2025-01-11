@@ -4,27 +4,27 @@ namespace Capcut_Helpers
 {
     public class Subtitle
     {
-        public required string Content { get; set; }
+        public required string Text { get; set; }
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
 
-        public static string AsSrt(List<Subtitle> subtitles, bool applyMinimizeContent = true)
+        private static string TimeSpanAsString(TimeSpan timespan)
+        {
+            return $"{timespan.Hours:D2}:{timespan.Minutes:D2}:{timespan.Seconds:D2},{timespan.Milliseconds:D3}";
+        }
+
+        public static string AsSrt(List<Subtitle> subtitles)
         {
             var srt = new StringBuilder(subtitles.Count * 100);
-
-            if (applyMinimizeContent)
-            {
-                subtitles = Ulti.MinimizeContent(subtitles);
-            }
 
             for (int i = 0; i < subtitles.Count; i++)
             {
                 srt.Append(i + 1).AppendLine()
-                   .Append(Ulti.AsString(subtitles[i].StartTime))
+                   .Append(TimeSpanAsString(subtitles[i].StartTime))
                    .Append(" --> ")
-                   .Append(Ulti.AsString(subtitles[i].EndTime))
+                   .Append(TimeSpanAsString(subtitles[i].EndTime))
                    .AppendLine()
-                   .AppendLine(subtitles[i].Content)
+                   .AppendLine(subtitles[i].Text)
                    .AppendLine();
             }
 

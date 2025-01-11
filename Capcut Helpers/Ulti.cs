@@ -4,11 +4,6 @@ namespace Capcut_Helpers
 {
     public static class Ulti
     {
-        public static string AsString(TimeSpan timespan)
-        {
-            return $"{timespan.Hours:D2}:{timespan.Minutes:D2}:{timespan.Seconds:D2},{timespan.Milliseconds:D3}";
-        }
-
         public static List<Subtitle> MinimizeContent(List<Subtitle> subtitles)
         {
             if (subtitles == null || subtitles.Count == 0)
@@ -21,17 +16,17 @@ namespace Capcut_Helpers
 
             for (int i = 1; i < subtitles.Count; i++)
             {
-                var content = subtitles[i].Content.ToLower().Trim();
-                if (string.IsNullOrEmpty(content) || content.Length == 1 || content.AsParallel().All(c => c == content[0]))
+                var content = subtitles[i].Text.ToLower();
+                if (string.IsNullOrEmpty(content) || content.Length == 1 || !content.Any(c => c.Equals(content[0])))
                 {
-                    subtitles[i].Content = string.Empty;
+                    subtitles[i].Text = string.Empty;
                 }
 
                 var next = subtitles[i];
 
-                if (current.EndTime == next.StartTime)
+                if (next.StartTime.Subtract(current.EndTime).TotalMilliseconds < 100)
                 {
-                    current.Content = $"{current.Content}\n{next.Content}".Trim();
+                    current.Text = $"{current.Text}\n{next.Text}".Trim();
                     current.EndTime = next.EndTime;
                 }
                 else
@@ -44,7 +39,7 @@ namespace Capcut_Helpers
             mergedSubtitles.Add(current);
 
             return mergedSubtitles
-                .Where(s => !string.IsNullOrEmpty(s.Content))
+                .Where(s => !string.IsNullOrEmpty(s.Text))
                 .OrderBy(s => s.StartTime)
                 .ToList();
         }
@@ -54,27 +49,24 @@ namespace Capcut_Helpers
             var content = await FileHelper.ReadFileAsync(draftContentFilePath);
             var draftContent = JsonConvert.DeserializeObject<DraftContent>(content);
 
-            var subtitles = new List<Subtitle>();
+            var textTrack = (draftContent?.Tracks.FirstOrDefault(t => t.Type.Equals("text", StringComparison.OrdinalIgnoreCase))) ?? throw new InvalidOperationException("Subtitle track not found");
 
-            var textTrack = (draftContent?.Tracks.AsParallel().FirstOrDefault(t => t.Type.Equals("text", StringComparison.OrdinalIgnoreCase))) ?? throw new InvalidOperationException("Subtitle track not found");
-            var segments = textTrack.Segments;
-
-            for (int i = 0; i < draftContent.Materials.Texts.Count; i++)
-            {
-                var text = string.Concat(draftContent.Materials.Texts[i].Words.Text);
-
-                var startTime = TimeSpan.FromTicks(segments[i].TargetTimerange.Start * 10);
-                var endTime = TimeSpan.FromTicks((segments[i].TargetTimerange.Start + segments[i].TargetTimerange.Duration) * 10);
-
-                subtitles.Add(new Subtitle
+            return draftContent.Materials.Texts
+                .Select((text, i) => new Subtitle
                 {
-                    Content = text.Trim(),
-                    StartTime = startTime,
-                    EndTime = endTime
-                });
-            }
+                    Text = string.Concat(text.Words.Text).Trim(),
+                    StartTime = TimeSpan.FromTicks(textTrack.Segments[i].TargetTimerange.Start * 10),
+                    EndTime = TimeSpan.FromTicks((textTrack.Segments[i].TargetTimerange.Start + textTrack.Segments[i].TargetTimerange.Duration) * 10)
+                })
+                .OrderBy(s => s.StartTime)
+                .ToList();
+        }
 
-            return subtitles;
+        public static async Task ExportSubtittle(List<Subtitle> subtitles, string outputFilePath)
+        {
+            var srt = Subtitle.AsSrt(subtitles);
+            var dirPath = Path.GetDirectoryName(outputFilePath) ?? throw new ArgumentNullException(nameof(outputFilePath), "Directory path cannot be null");
+            await FileHelper.WriteFileAsync(dirPath, Path.GetFileName(outputFilePath), srt);
         }
     }
 }
