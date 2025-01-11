@@ -17,14 +17,14 @@ namespace Capcut_Helpers
             for (int i = 1; i < subtitles.Count; i++)
             {
                 var content = subtitles[i].Text.ToLower();
-                if (string.IsNullOrEmpty(content) || content.Length == 1 || !content.Any(c => c.Equals(content[0])))
+                if (string.IsNullOrEmpty(content) || content.Length == 1 || content.All(c => c == content[0]))
                 {
                     subtitles[i].Text = string.Empty;
                 }
 
                 var next = subtitles[i];
 
-                if (next.StartTime.Subtract(current.EndTime).TotalMilliseconds < 100)
+                if (next.StartTime.Subtract(current.EndTime).TotalMilliseconds < 100.0D)
                 {
                     current.Text = $"{current.Text}\n{next.Text}".Trim();
                     current.EndTime = next.EndTime;
@@ -44,7 +44,7 @@ namespace Capcut_Helpers
                 .ToList();
         }
 
-        public static async Task<List<Subtitle>> GetSubtittle(string draftContentFilePath)
+        public static async Task<List<Subtitle>> GetSubtittleAsync(string draftContentFilePath)
         {
             var content = await FileHelper.ReadFileAsync(draftContentFilePath);
             var draftContent = JsonConvert.DeserializeObject<DraftContent>(content);
@@ -62,11 +62,10 @@ namespace Capcut_Helpers
                 .ToList();
         }
 
-        public static async Task ExportSubtittle(List<Subtitle> subtitles, string outputFilePath)
+        public static async Task ExportSubtittleAsync(List<Subtitle> subtitles, string outputFilePath)
         {
             var srt = Subtitle.AsSrt(subtitles);
-            var dirPath = Path.GetDirectoryName(outputFilePath) ?? throw new ArgumentNullException(nameof(outputFilePath), "Directory path cannot be null");
-            await FileHelper.WriteFileAsync(dirPath, Path.GetFileName(outputFilePath), srt);
+            await FileHelper.WriteFileAsync(outputFilePath, srt);
         }
     }
 }

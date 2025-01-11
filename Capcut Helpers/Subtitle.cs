@@ -4,9 +4,9 @@ namespace Capcut_Helpers
 {
     public class Subtitle
     {
-        public required string Text { get; set; }
         public TimeSpan StartTime { get; set; }
         public TimeSpan EndTime { get; set; }
+        public required string Text { get; set; }
 
         private static string TimeSpanAsString(TimeSpan timespan)
         {

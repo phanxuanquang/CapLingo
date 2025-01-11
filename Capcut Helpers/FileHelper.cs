@@ -24,17 +24,10 @@
             }
         }
 
-        public static async Task WriteFileAsync(string dirPath, string fileName, string content)
+        public static async Task WriteFileAsync(string filePath, string content)
         {
             try
             {
-                dirPath = Path.GetFullPath(dirPath);
-                if (!Directory.Exists(dirPath))
-                {
-                    throw new DirectoryNotFoundException($"Directory not found: {dirPath}");
-                }
-
-                var filePath = Path.Combine(dirPath, fileName);
                 await File.WriteAllTextAsync(filePath, content).ConfigureAwait(false);
             }
             catch (UnauthorizedAccessException ex)
