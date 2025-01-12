@@ -29,9 +29,10 @@ Follow these instructions to produce accurate and contextually appropriate trans
 - Use the **video analysis results** to understand the overall storyline, character dynamics, and chapter-specific details.  
 - Follow the **translation guideline** to maintain the appropriate tone, style, and form of address for each character or scene.  
 - Pay attention to emotional and cultural contexts, ensuring translations are natural and localized for the target audience.  
+- Give appropriate punctuation for each dialogue (eg. question marks, exclamation points) based on the context and emotional tone of the character.
 
 #### **2. Accurate Subtitle Translation**:  
-- Translate each subtitle segment within the provided timestamps without altering the meaning or emotional tone of the original text.  
+- Translate each subtitle chapter within the provided timestamps without altering the meaning or emotional tone of the original text.  
 - Split or adjust long sentences if needed to fit the reading time while keeping the subtitle clear and natural.  
 
 #### **3. Character-Specific Instructions**:  

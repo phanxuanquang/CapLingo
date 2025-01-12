@@ -88,7 +88,7 @@ namespace Translator
             return videoAnalysis;
         }
 
-        public static async Task<List<Subtitle>> TranslateVideo(List<Subtitle> originalSubtitles)
+        public static async Task<List<Subtitle>?> TranslateVideo(List<Subtitle> originalSubtitles)
         {
             var promptBuilder = new StringBuilder();
             promptBuilder.AppendLine(VideoAnalysis);
@@ -103,31 +103,38 @@ namespace Translator
             promptBuilder.AppendLine();
             promptBuilder.AppendLine("# **Transcript Array**");
             promptBuilder.AppendLine();
-            promptBuilder.AppendLine($"> Be noted that this is only the transtription of the chapter from `{TimeSpanHelper.AsString(originalSubtitles[0].StartTime, false)}` to `{TimeSpanHelper.AsString(originalSubtitles[0].EndTime, false)}`.");
+            promptBuilder.AppendLine($"*Be noted that this is only the transtription of the chapter from `{originalSubtitles[0].StartTime.Minutes:D2}:{originalSubtitles[0].StartTime.Seconds:D2}` to `{originalSubtitles[0].EndTime.Minutes:D2}:{originalSubtitles[0].EndTime.Seconds:D2}`.*");
             promptBuilder.AppendLine();
             promptBuilder.AppendLine("```json");
             promptBuilder.AppendLine(JsonConvert.SerializeObject(originalSubtitles
                 .Select(s => new TranslatedSubtitle
                 {
-                    StartAt = TimeSpanHelper.AsString(s.StartTime, false),
-                    EndAt = TimeSpanHelper.AsString(s.EndTime, false),
+                    StartAt = $"{s.StartTime.Minutes:D2}:{s.StartTime.Seconds:D2}",
+                    EndAt = $"{s.EndTime.Minutes:D2}:{s.EndTime.Seconds:D2}",
                     Text = s.Text
                 })
                 .ToList(), Formatting.Indented));
             promptBuilder.AppendLine("```");
 
-            var result = await Gemini.GenerateContentFromVideo(_videoTranslatingInstruction, promptBuilder.ToString(), _videoUri, _videoMimeType, CreativityLevel.Medium);
+            try
+            {
+                var result = await Gemini.GenerateContentFromVideo(_videoTranslatingInstruction, promptBuilder.ToString(), _videoUri, _videoMimeType, CreativityLevel.Medium);
 
-            var translatedSubtitles = JsonConvert.DeserializeObject<List<TranslatedSubtitle>>(result);
+                var translatedSubtitles = JsonConvert.DeserializeObject<List<TranslatedSubtitle>>(result);
 
-            return originalSubtitles
-                .Select((subtitle, index) => new Subtitle
-                {
-                    StartTime = subtitle.StartTime,
-                    EndTime = subtitle.EndTime,
-                    Text = translatedSubtitles[index].Text
-                })
-                .ToList();
+                return originalSubtitles
+                    .Select((subtitle, index) => new Subtitle
+                    {
+                        StartTime = subtitle.StartTime,
+                        EndTime = subtitle.EndTime,
+                        Text = translatedSubtitles[index].Text
+                    })
+                    .ToList();
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public static async Task ExtractTranslationGuideline()

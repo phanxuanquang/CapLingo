@@ -33,33 +33,53 @@ namespace CapLingo_Lite
             if (EnableMinimizeSubtitle_Checkbox.Checked)
             {
                 Cache.OriginalSubtitle = SubtittleHelper.MinimizeDialogues(Cache.OriginalSubtitle);
-                LogTextBox.Text += "Dialogues minimized\n";
+                LogTextBox.Text += "Dialogues minimized.";
             }
 
+            GoogleFileUploader.GoogleApiKey = GeminiApiKey_TextBox.Text.Trim();
+            this.Enabled = false;
+            LogTextBox.Enabled = true;
             try
             {
-                LogTextBox.Text += "Preparing file to upload...";
-                GoogleVideoUploader.GoogleApiKey = GeminiApiKey_TextBox.Text.Trim();
-                var uploadUrl = await GoogleVideoUploader.InitiateResumableUpload(Cache.VideoFilePath);
-
-                LogTextBox.Text += "\nSending video to Gemini...";
-                _fileUri = await GoogleVideoUploader.UploadVideoData(uploadUrl, Cache.VideoFilePath);
-                var fileId = _fileUri.Replace("https://generativelanguage.googleapis.com/v1beta/files/", string.Empty);
-
-                LogTextBox.Text += "\nProcessing video...";
-                var state = await GoogleVideoUploader.GetFileState(fileId);
-                while (state == "PROCESSING")
+                var file = await GoogleFileUploader.GetFile(Cache.VideoFilePath);
+                if (file != null)
                 {
-                    LogTextBox.Text += "\nProcessing video...";
-                    await Task.Delay(5000);
-                    state = await GoogleVideoUploader.GetFileState(fileId);
+                    _fileUri = file.Uri;
                 }
             }
             catch (Exception ex)
             {
-                LogTextBox.Text += $"\nFailed to upload the video: {ex.Message}";
-                MessageBox.Show(ex.Message, "Failed to upload the video. Please try again!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                LogTextBox.Text += $"\nFailed to get the file URI: {ex.Message}";
+                MessageBox.Show(ex.Message, "Failed to get the file URI. Please try again!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
+            }
+
+            if (string.IsNullOrEmpty(_fileUri))
+            {
+                try
+                {
+                    LogTextBox.Text += "\nPreparing file to upload...";
+                    var uploadUrl = await GoogleFileUploader.InitiateResumableUpload(Cache.VideoFilePath);
+
+                    LogTextBox.Text += "\nSending video to Gemini...";
+                    _fileUri = await GoogleFileUploader.UploadVideoData(uploadUrl, Cache.VideoFilePath);
+                    var fileId = _fileUri.Replace("https://generativelanguage.googleapis.com/v1beta/files/", string.Empty);
+
+                    LogTextBox.Text += "\nProcessing video...";
+                    var isProcessing = await GoogleFileUploader.IsProcessing(fileId);
+                    while (isProcessing)
+                    {
+                        LogTextBox.Text += "\nProcessing video...";
+                        await Task.Delay(15000);
+                        isProcessing = await GoogleFileUploader.IsProcessing(fileId);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogTextBox.Text += $"\nFailed to upload the video: {ex.Message}";
+                    MessageBox.Show(ex.Message, "Failed to upload the video. Please try again!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
             }
 
             try
@@ -77,8 +97,10 @@ namespace CapLingo_Lite
 
             try
             {
-                LogTextBox.Text += "Analyzing video...";
+                LogTextBox.Text += "\nAnalyzing video...";
                 analysis = await Translator.Translator.AnalyzeVideo();
+                LogTextBox.Text = Translator.Translator.VideoAnalysis;
+                await Task.Delay(15000);
             }
             catch (Exception ex)
             {
@@ -87,15 +109,13 @@ namespace CapLingo_Lite
                 return;
             }
 
-            LogTextBox.Clear();
-            LogTextBox.Text = Translator.Translator.VideoAnalysis;
-
             try
             {
                 LogTextBox.Text += "\n====================================================";
                 LogTextBox.Text += "\nExtracting translation guideline...";
                 await Translator.Translator.ExtractTranslationGuideline();
-                LogTextBox.Text += $"\n{Translator.Translator.TranslationGuideline}";
+                LogTextBox.Text = $"\n{Translator.Translator.TranslationGuideline}";
+                await Task.Delay(15000);
             }
             catch (Exception ex)
             {
@@ -108,7 +128,7 @@ namespace CapLingo_Lite
             var results = await Task.WhenAll(translationTasks);
 
             Cache.TranslatedSubtitle = results
-                .Where(r => r != null)
+                .Where(r => r != null && r.Count > 0)
                 .SelectMany(subtitle => subtitle)
                 .DistinctBy(s => s.StartTime)
                 .OrderBy(subtitle => subtitle.StartTime)
@@ -128,6 +148,7 @@ namespace CapLingo_Lite
             }
 
             LogTextBox.Text = srt.ToString();
+            this.Enabled = true;
         }
 
         private async Task<List<Subtitle>?> TranslateChapter(Chapter chapter)
@@ -135,8 +156,14 @@ namespace CapLingo_Lite
             try
             {
                 var subtitles = Cache.OriginalSubtitle
-                    .Where(subtitles => TimeSpanHelper.AsTimeSpan(chapter.StartTime) <= subtitles.StartTime && subtitles.EndTime <= TimeSpanHelper.AsTimeSpan(chapter.EndTime))
+                    .Where(subtitles => TimeSpanHelper.AsTimeSpan($"00:{chapter.StartTime}") <= subtitles.StartTime && subtitles.EndTime <= TimeSpanHelper.AsTimeSpan($"00:{chapter.EndTime}"))
                     .ToList();
+
+
+                if (subtitles.Count == 0)
+                {
+                    return new List<Subtitle>();
+                }
 
                 var translatedSubtitles = await Translator.Translator.TranslateVideo(subtitles);
                 return translatedSubtitles;

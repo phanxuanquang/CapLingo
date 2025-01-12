@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using GenAI.Models;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Text;
 using Utilities;
@@ -24,7 +25,7 @@ namespace GenAI
         High = 75
     }
 
-    public static class GoogleVideoUploader
+    public static class GoogleFileUploader
     {
         private static readonly string BaseUrl = "https://generativelanguage.googleapis.com";
         public static string GoogleApiKey;
@@ -75,15 +76,34 @@ namespace GenAI
             return jsonResponse.SelectToken("$.file.uri")?.ToString();
         }
 
-        public static async Task<string> GetFileState(string fileId)
+        public static async Task<FileUploadApiResponse.File?> GetFile(string filePath)
+        {
+            var response = await client.GetAsync($"{BaseUrl}/v1beta/files?key={GoogleApiKey}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseBody = await response.Content.ReadAsStringAsync();
+                var files = JsonConvert.DeserializeObject<FileUploadApiResponse.Root>(responseBody);
+                return files?.Files
+                    .OrderByDescending(f => f.CreateTime)
+                    .FirstOrDefault(f => f.State.Equals("ACTIVE", StringComparison.OrdinalIgnoreCase) && f.DisplayName.Equals(Path.GetFileName(filePath), StringComparison.OrdinalIgnoreCase));
+            }
+            else
+            {
+                throw new InvalidDataException($"Error checking file state: {response.ReasonPhrase}");
+            }
+        }
+
+        public static async Task<bool> IsProcessing(string fileId)
         {
             var response = await client.GetAsync($"{BaseUrl}/v1beta/files/{fileId}?key={GoogleApiKey}");
 
             if (response.IsSuccessStatusCode)
             {
                 var responseBody = await response.Content.ReadAsStringAsync();
-                var jsonResponse = JObject.Parse(responseBody);
-                return jsonResponse.SelectToken("$.state")?.ToString();
+                var file = JsonConvert.DeserializeObject<FileUploadApiResponse.File>(responseBody);
+
+                return file.State.Equals("PROCESSING", StringComparison.OrdinalIgnoreCase);
             }
             else
             {

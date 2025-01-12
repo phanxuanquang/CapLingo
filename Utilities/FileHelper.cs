@@ -2,7 +2,7 @@
 {
     public static class FileHelper
     {
-        public static async Task<string> ReadFileAsync(string path)
+        public static async Task<string> ReadFileAsync(string path, bool useEncription = false)
         {
             try
             {
@@ -12,7 +12,9 @@
                     throw new FileNotFoundException($"File not found: {path}", path);
                 }
 
-                return await File.ReadAllTextAsync(path).ConfigureAwait(false);
+                var content = await File.ReadAllTextAsync(path).ConfigureAwait(false);
+
+                return useEncription ? CriptographyHelper.Decrypt(content) : content;
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -24,10 +26,12 @@
             }
         }
 
-        public static async Task WriteFileAsync(string filePath, string content)
+        public static async Task WriteFileAsync(string filePath, string content, bool useEncription = false)
         {
             try
             {
+                content = useEncription ? CriptographyHelper.Encrypt(content) : content;
+
                 await File.WriteAllTextAsync(filePath, content).ConfigureAwait(false);
             }
             catch (UnauthorizedAccessException ex)
@@ -40,9 +44,10 @@
             }
         }
 
-        public static string GetVideoMimeType(string path)
+        public static string GetVideoMimeType(string filePath)
         {
-            return "video/mp4";
+            var extension = Path.GetExtension(filePath).ToLowerInvariant();
+            return $"video/{extension.Replace(".", string.Empty)}";
         }
     }
 }

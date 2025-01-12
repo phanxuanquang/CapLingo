@@ -58,7 +58,7 @@ The JSON output must strictly follow this structure:
 #### **Chapters**:
 - Divide the video into logical chapters, but ensure the total number of chapters should not be greater than **10** and ideally less than **5**.  
 - For each chapter:  
-  - **StartTime** and **EndTime**: Use the format `HH:MM:SS` (e.g., `"00:00:00"` to `"00:04:15"`). Ensure times are accurate and non-overlapping.  
+  - **StartTime** and **EndTime**: Use the format `MM:SS` (e.g., `"00:00"` to `"04:15"`). Ensure times are accurate and non-overlapping.  
   - **Description**: Summarize the main events of the chapter with less than 100 words.  
     - Mention significant plot points and key characters involved.  
     - Maintain logical continuity between chapters.  
@@ -67,13 +67,13 @@ The JSON output must strictly follow this structure:
   ```json
   "Chapters": [
       {
-          "StartTime": "00:00:00",
-          "EndTime": "00:04:37",
+          "StartTime": "00:00",
+          "EndTime": "04:37",
           "Description": "Queen Eleanor learns about a rebellion brewing among the northern nobles and consults Sir Alden for advice."
       },
       {
-          "StartTime": "00:04:38",
-          "EndTime": "00:11:03",
+          "StartTime": "04:38",
+          "EndTime": "11:03",
           "Description": "Lord Edmund meets with the rebels, revealing his plans to overthrow Eleanor and claim the throne."
       }
   ]
@@ -129,13 +129,13 @@ The JSON output must strictly follow this structure:
     "Summarization": "The video is set in a medieval kingdom, following Queen Eleanor as she defends her throne against rebellious nobles. The story highlights Eleanor's strategic mind and her relationships with her loyal knight, Sir Alden, and her estranged brother, Lord Edmund. Interactions are formal, reflecting hierarchical dynamics.",
     "Chapters": [
         {
-            "StartTime": "00:00:00",
-            "EndTime": "00:04:15",
+            "StartTime": "00:00",
+            "EndTime": "04:15",
             "Description": "Queen Eleanor learns of a rebellion brewing among the northern nobles and consults Sir Alden for counsel."
         },
         {
-            "StartTime": "00:04:16",
-            "EndTime": "00:09:30",
+            "StartTime": "04:16",
+            "EndTime": "09:30",
             "Description": "Lord Edmund, Eleanor's estranged brother, meets with the rebels, revealing his intentions to claim the throne."
         }
     ],

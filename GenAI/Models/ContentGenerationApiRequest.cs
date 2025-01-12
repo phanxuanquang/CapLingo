@@ -2,7 +2,7 @@
 
 namespace GenAI.Models
 {
-    public class ApiRequest
+    public class ContentGenerationApiRequest
     {
         public class Content
         {

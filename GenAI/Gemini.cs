@@ -82,13 +82,13 @@ namespace GenAI
         {
             using var client = new HttpClient();
 
-            var requestData = new ApiRequest.Root
+            var requestData = new ContentGenerationApiRequest.Root
             {
-                SystemInstruction = new ApiRequest.SystemInstruction
+                SystemInstruction = new ContentGenerationApiRequest.SystemInstruction
                 {
                     Parts =
                     [
-                        new ApiRequest.Part
+                        new ContentGenerationApiRequest.Part
                         {
                             Text = systemInstruction
                         }
@@ -96,14 +96,14 @@ namespace GenAI
                 },
                 Contents =
                 [
-                    new ApiRequest.Content
+                    new ContentGenerationApiRequest.Content
                     {
                         Role = "user",
                         Parts =
                         [
-                            new ApiRequest.Part
+                            new ContentGenerationApiRequest.Part
                             {
-                                FileData = new ApiRequest.FileData
+                                FileData = new ContentGenerationApiRequest.FileData
                                 {
                                     FileUri = videoUri,
                                     MimeType = mimeType
@@ -111,19 +111,19 @@ namespace GenAI
                             }
                         ]
                     },
-                    new ApiRequest.Content
+                    new ContentGenerationApiRequest.Content
                     {
                         Role = "user",
                         Parts =
                         [
-                            new ApiRequest.Part
+                            new ContentGenerationApiRequest.Part
                             {
                                 Text = prompt
                             }
                         ]
                     },
                 ],
-                GenerationConfig = new ApiRequest.GenerationConfig
+                GenerationConfig = new ContentGenerationApiRequest.GenerationConfig
                 {
                     Temperature = (double)creativityLevel / 100.0D,
                     TopK = 40,
