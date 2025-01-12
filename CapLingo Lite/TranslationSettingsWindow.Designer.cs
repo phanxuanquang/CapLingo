@@ -39,7 +39,7 @@
             // 
             // TargetLanguage_ComboBox
             // 
-            TargetLanguage_ComboBox.Anchor = AnchorStyles.Left | AnchorStyles.Right;
+            TargetLanguage_ComboBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             TargetLanguage_ComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             TargetLanguage_ComboBox.FormattingEnabled = true;
             TargetLanguage_ComboBox.Location = new Point(18, 126);
@@ -49,7 +49,6 @@
             // 
             // label1
             // 
-            label1.Anchor = AnchorStyles.Left;
             label1.AutoSize = true;
             label1.Location = new Point(18, 95);
             label1.Name = "label1";
@@ -59,7 +58,8 @@
             // 
             // Start_Btn
             // 
-            Start_Btn.Anchor = AnchorStyles.Bottom;
+            Start_Btn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            Start_Btn.Enabled = false;
             Start_Btn.Location = new Point(282, 502);
             Start_Btn.Name = "Start_Btn";
             Start_Btn.Size = new Size(194, 47);
@@ -101,7 +101,7 @@
             // 
             // ValidateApiKey_Btn
             // 
-            ValidateApiKey_Btn.Anchor = AnchorStyles.Right;
+            ValidateApiKey_Btn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             ValidateApiKey_Btn.Location = new Point(609, 44);
             ValidateApiKey_Btn.Name = "ValidateApiKey_Btn";
             ValidateApiKey_Btn.Size = new Size(133, 34);

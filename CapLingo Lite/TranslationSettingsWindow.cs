@@ -25,6 +25,7 @@ namespace CapLingo_Lite
         private async void Start_Btn_Click(object sender, EventArgs e)
         {
             var analyst = new VideoAnalyst();
+            var fileUri = string.Empty;
             try
             {
                 LogTextBox.Text += "Preparing file to upload...";
@@ -32,7 +33,7 @@ namespace CapLingo_Lite
                 var uploadUrl = await GoogleVideoUploader.InitiateResumableUpload(Cache.VideoFilePath);
 
                 LogTextBox.Text += "\nSending video to Gemini...";
-                var fileUri = await GoogleVideoUploader.UploadVideoData(uploadUrl, Cache.VideoFilePath);
+                fileUri = await GoogleVideoUploader.UploadVideoData(uploadUrl, Cache.VideoFilePath);
                 var fileId = fileUri.Replace("https://generativelanguage.googleapis.com/v1beta/files/", string.Empty);
 
                 LogTextBox.Text += "\nProcessing video...";
@@ -40,7 +41,7 @@ namespace CapLingo_Lite
                 while (state == "PROCESSING")
                 {
                     LogTextBox.Text += "\nProcessing video...";
-                    await Task.Delay(5000);
+                    await Task.Delay(3000);
                     state = await GoogleVideoUploader.GetFileState(fileId);
                 }
             }
@@ -54,7 +55,7 @@ namespace CapLingo_Lite
             try
             {
                 LogTextBox.Text += "Analyzing video...";
-                await analyst.AnalyzeVideo(Cache.VideoFilePath, 5);
+                await analyst.AnalyzeVideo(fileUri, FileHelper.GetVideoMimeType(Cache.VideoFilePath), 5);
             }
             catch (Exception ex)
             {
@@ -89,13 +90,10 @@ namespace CapLingo_Lite
                 logBuilder.AppendLine();
             }
             logBuilder.AppendLine("====================================================");
+
             var analysisLog = logBuilder.ToString();
 
-            foreach (var word in analysisLog)
-            {
-                LogTextBox.Text += word;
-                await Task.Delay(10);
-            }
+            LogTextBox.Text = analysisLog;
 
             var translationTasks = analyst.VideoAnalysis.Chapters.Select(TranslateChapter);
             var results = await Task.WhenAll(translationTasks);

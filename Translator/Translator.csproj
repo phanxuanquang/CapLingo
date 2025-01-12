@@ -7,11 +7,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="Instructions\VideoAnalysisInstruction.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Domains\Domains.csproj" />
+    <ProjectReference Include="..\GenAI\GenAI.csproj" />
   </ItemGroup>
 
 </Project>

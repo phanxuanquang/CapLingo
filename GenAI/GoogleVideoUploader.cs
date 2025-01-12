@@ -17,9 +17,11 @@ namespace GenAI
         public FileData file_data { get; set; }
     }
 
-    public class Content
+    public enum CreativityLevel
     {
-        public List<Part> parts { get; set; }
+        Low = 25,
+        Medium = 50,
+        High = 75
     }
 
     public static class GoogleVideoUploader
@@ -80,8 +82,8 @@ namespace GenAI
             if (response.IsSuccessStatusCode)
             {
                 var responseBody = await response.Content.ReadAsStringAsync();
-                dynamic fileInfo = JsonConvert.DeserializeObject(responseBody);
-                return fileInfo.file.state;
+                var jsonResponse = JObject.Parse(responseBody);
+                return jsonResponse.SelectToken("$.state")?.ToString();
             }
             else
             {
