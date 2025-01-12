@@ -35,6 +35,7 @@
             GeminiApiKey_TextBox = new TextBox();
             label2 = new Label();
             ValidateApiKey_Btn = new Button();
+            EnableMinimizeSubtitle_Checkbox = new CheckBox();
             SuspendLayout();
             // 
             // TargetLanguage_ComboBox
@@ -44,7 +45,7 @@
             TargetLanguage_ComboBox.FormattingEnabled = true;
             TargetLanguage_ComboBox.Location = new Point(18, 126);
             TargetLanguage_ComboBox.Name = "TargetLanguage_ComboBox";
-            TargetLanguage_ComboBox.Size = new Size(724, 33);
+            TargetLanguage_ComboBox.Size = new Size(996, 33);
             TargetLanguage_ComboBox.TabIndex = 0;
             // 
             // label1
@@ -60,9 +61,9 @@
             // 
             Start_Btn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             Start_Btn.Enabled = false;
-            Start_Btn.Location = new Point(282, 502);
+            Start_Btn.Location = new Point(282, 952);
             Start_Btn.Name = "Start_Btn";
-            Start_Btn.Size = new Size(194, 47);
+            Start_Btn.Size = new Size(466, 47);
             Start_Btn.TabIndex = 2;
             Start_Btn.Text = "Start";
             Start_Btn.UseVisualStyleBackColor = true;
@@ -76,7 +77,7 @@
             LogTextBox.Location = new Point(18, 174);
             LogTextBox.Name = "LogTextBox";
             LogTextBox.ReadOnly = true;
-            LogTextBox.Size = new Size(724, 314);
+            LogTextBox.Size = new Size(996, 723);
             LogTextBox.TabIndex = 3;
             LogTextBox.Text = "";
             // 
@@ -86,12 +87,11 @@
             GeminiApiKey_TextBox.Location = new Point(18, 46);
             GeminiApiKey_TextBox.Name = "GeminiApiKey_TextBox";
             GeminiApiKey_TextBox.PlaceholderText = "AIzaSy...";
-            GeminiApiKey_TextBox.Size = new Size(585, 31);
+            GeminiApiKey_TextBox.Size = new Size(857, 31);
             GeminiApiKey_TextBox.TabIndex = 4;
             // 
             // label2
             // 
-            label2.Anchor = AnchorStyles.Left;
             label2.AutoSize = true;
             label2.Location = new Point(18, 13);
             label2.Name = "label2";
@@ -102,7 +102,7 @@
             // ValidateApiKey_Btn
             // 
             ValidateApiKey_Btn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            ValidateApiKey_Btn.Location = new Point(609, 44);
+            ValidateApiKey_Btn.Location = new Point(881, 44);
             ValidateApiKey_Btn.Name = "ValidateApiKey_Btn";
             ValidateApiKey_Btn.Size = new Size(133, 34);
             ValidateApiKey_Btn.TabIndex = 6;
@@ -110,11 +110,23 @@
             ValidateApiKey_Btn.UseVisualStyleBackColor = true;
             ValidateApiKey_Btn.Click += ValidateApiKey_Btn_Click;
             // 
+            // EnableMinimizeSubtitle_Checkbox
+            // 
+            EnableMinimizeSubtitle_Checkbox.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            EnableMinimizeSubtitle_Checkbox.AutoSize = true;
+            EnableMinimizeSubtitle_Checkbox.Location = new Point(18, 903);
+            EnableMinimizeSubtitle_Checkbox.Name = "EnableMinimizeSubtitle_Checkbox";
+            EnableMinimizeSubtitle_Checkbox.Size = new Size(186, 29);
+            EnableMinimizeSubtitle_Checkbox.TabIndex = 7;
+            EnableMinimizeSubtitle_Checkbox.Text = "Cleanup Dialogues";
+            EnableMinimizeSubtitle_Checkbox.UseVisualStyleBackColor = true;
+            // 
             // TranslationSettingsWindow
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(759, 561);
+            ClientSize = new Size(1031, 1011);
+            Controls.Add(EnableMinimizeSubtitle_Checkbox);
             Controls.Add(ValidateApiKey_Btn);
             Controls.Add(label2);
             Controls.Add(GeminiApiKey_TextBox);
@@ -139,5 +151,6 @@
         private TextBox GeminiApiKey_TextBox;
         private Label label2;
         private Button ValidateApiKey_Btn;
+        private CheckBox EnableMinimizeSubtitle_Checkbox;
     }
 }

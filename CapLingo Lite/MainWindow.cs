@@ -108,6 +108,7 @@ namespace CapLingo_Lite
                     Cache.SubtitleFilePath = SubtitleFilePath_TextBox.Text;
                     var translationSettings = new TranslationSettingsWindow();
                     translationSettings.ShowDialog();
+                    DialoguesTable.DataSource = Cache.TranslatedSubtitle;
                 }
             }
         }

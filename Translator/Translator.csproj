@@ -7,7 +7,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Instructions\TranslationGuidelineInstruction.md" />
+    <None Remove="Instructions\VideoTranslatingInstruction.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Instructions\TranslationGuidelineInstruction.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Instructions\VideoAnalysisInstruction.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Instructions\VideoTranslatingInstruction.md">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

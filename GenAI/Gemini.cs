@@ -20,11 +20,9 @@ namespace GenAI
             var modelName = "gemini-1.5-flash-latest";
             var endpoint = $"https://generativelanguage.googleapis.com/v1beta/models/{modelName}:generateContent?key={ApiKey}";
 
-            var request = responseType != null
-                ? BuildRequest(systemInstruction, prompt, responseType, creativityLevel)
-                : new
-                {
-                    contents = new[]
+            var request = new
+            {
+                contents = new[]
                     {
                             new
                             {
@@ -37,7 +35,7 @@ namespace GenAI
                                 }
                             }
                     },
-                    safetySettings = new[]
+                safetySettings = new[]
                     {
                             new
                             {
@@ -60,14 +58,14 @@ namespace GenAI
                                 threshold = "BLOCK_NONE"
                             }
                     },
-                    generationConfig = new
-                    {
-                        temperature = (double)creativityLevel / 100,
-                        topP = 0.8,
-                        topK = 10,
-                        responseMimeType = "text/plain"
-                    }
-                };
+                generationConfig = new
+                {
+                    temperature = (double)creativityLevel / 100,
+                    topP = 0.8,
+                    topK = 10,
+                    responseMimeType = "text/plain"
+                }
+            };
 
             var json = JsonConvert.SerializeObject(request);
 
@@ -80,7 +78,7 @@ namespace GenAI
             return JObject.Parse(responseData).SelectToken("$.candidates[0].content.parts[0].text")?.ToString();
         }
 
-        public static async Task<string> GenerateContentFromVideo(string systemInstruction, string prompt, string videoUri, string mimeType, CreativityLevel creativityLevel = CreativityLevel.Medium, Type? responseType = null)
+        public static async Task<string> GenerateContentFromVideo(string systemInstruction, string prompt, string videoUri, string mimeType, CreativityLevel creativityLevel = CreativityLevel.Medium, bool useJsonForOutput = true)
         {
             using var client = new HttpClient();
 
@@ -131,7 +129,7 @@ namespace GenAI
                     TopK = 40,
                     TopP = 0.95,
                     MaxOutputTokens = 8192,
-                    ResponseMimeType = "application/json"
+                    ResponseMimeType = useJsonForOutput ? "application/json" : "text/plain"
                 }
             };
 

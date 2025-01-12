@@ -3,7 +3,6 @@ using GenAI;
 using System.Data;
 using System.Globalization;
 using System.Text;
-using Translator;
 using Translator.Models;
 using Utilities;
 
@@ -11,6 +10,7 @@ namespace CapLingo_Lite
 {
     public partial class TranslationSettingsWindow : Form
     {
+        private string _fileUri;
         public TranslationSettingsWindow()
         {
             InitializeComponent();
@@ -24,8 +24,18 @@ namespace CapLingo_Lite
 
         private async void Start_Btn_Click(object sender, EventArgs e)
         {
-            var analyst = new VideoAnalyst();
-            var fileUri = string.Empty;
+            if (string.IsNullOrEmpty(GeminiApiKey_TextBox.Text.Trim()))
+            {
+                MessageBox.Show("Please enter the Gemini API key", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (EnableMinimizeSubtitle_Checkbox.Checked)
+            {
+                Cache.OriginalSubtitle = SubtittleHelper.MinimizeDialogues(Cache.OriginalSubtitle);
+                LogTextBox.Text += "Dialogues minimized\n";
+            }
+
             try
             {
                 LogTextBox.Text += "Preparing file to upload...";
@@ -33,15 +43,15 @@ namespace CapLingo_Lite
                 var uploadUrl = await GoogleVideoUploader.InitiateResumableUpload(Cache.VideoFilePath);
 
                 LogTextBox.Text += "\nSending video to Gemini...";
-                fileUri = await GoogleVideoUploader.UploadVideoData(uploadUrl, Cache.VideoFilePath);
-                var fileId = fileUri.Replace("https://generativelanguage.googleapis.com/v1beta/files/", string.Empty);
+                _fileUri = await GoogleVideoUploader.UploadVideoData(uploadUrl, Cache.VideoFilePath);
+                var fileId = _fileUri.Replace("https://generativelanguage.googleapis.com/v1beta/files/", string.Empty);
 
                 LogTextBox.Text += "\nProcessing video...";
                 var state = await GoogleVideoUploader.GetFileState(fileId);
                 while (state == "PROCESSING")
                 {
                     LogTextBox.Text += "\nProcessing video...";
-                    await Task.Delay(3000);
+                    await Task.Delay(5000);
                     state = await GoogleVideoUploader.GetFileState(fileId);
                 }
             }
@@ -54,8 +64,21 @@ namespace CapLingo_Lite
 
             try
             {
+                await Translator.Translator.Prepare(_fileUri, FileHelper.GetVideoMimeType(Cache.VideoFilePath), TargetLanguage_ComboBox.Text);
+            }
+            catch (Exception ex)
+            {
+                LogTextBox.Text += $"\nFailed to prepare the documents: {ex.Message}";
+                MessageBox.Show(ex.Message, "Failed to prepare the documents", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            var analysis = new VideoAnalysis();
+
+            try
+            {
                 LogTextBox.Text += "Analyzing video...";
-                await analyst.AnalyzeVideo(fileUri, FileHelper.GetVideoMimeType(Cache.VideoFilePath), 5);
+                analysis = await Translator.Translator.AnalyzeVideo();
             }
             catch (Exception ex)
             {
@@ -65,63 +88,62 @@ namespace CapLingo_Lite
             }
 
             LogTextBox.Clear();
-            var logBuilder = new StringBuilder();
+            LogTextBox.Text = Translator.Translator.VideoAnalysis;
 
-            logBuilder.AppendLine($"Primary language of the video: {analyst.VideoAnalysis.AudioLanguage}");
-            logBuilder.AppendLine("====================================================");
-            logBuilder.AppendLine(analyst.VideoAnalysis.Summarization);
-            logBuilder.AppendLine("====================================================");
-            logBuilder.AppendLine($"Found {analyst.VideoAnalysis.Characters.Count} characters:");
-            for (int i = 0; i < analyst.VideoAnalysis.Characters.Count; i++)
+            try
             {
-                var character = analyst.VideoAnalysis.Characters[i];
-                logBuilder.AppendLine($"   {i + 1}. {character.Alias}:");
-                logBuilder.AppendLine($"   - Appearance: {character.Appearance}");
-                logBuilder.AppendLine($"   - Speaking Tone: {character.SpeakingTone}");
-                logBuilder.AppendLine();
+                LogTextBox.Text += "\n====================================================";
+                LogTextBox.Text += "\nExtracting translation guideline...";
+                await Translator.Translator.ExtractTranslationGuideline();
+                LogTextBox.Text += $"\n{Translator.Translator.TranslationGuideline}";
             }
-            logBuilder.AppendLine("====================================================");
-            logBuilder.AppendLine($"The video can be separated into {analyst.VideoAnalysis.Chapters.Count} chapters:");
-            for (int i = 0; i < analyst.VideoAnalysis.Chapters.Count; i++)
+            catch (Exception ex)
             {
-                var chapter = analyst.VideoAnalysis.Chapters[i];
-                logBuilder.AppendLine($"   {i + 1}. {chapter.StartTime} to {chapter.EndTime}:");
-                logBuilder.AppendLine($"   - {chapter.Description}");
-                logBuilder.AppendLine();
+                LogTextBox.Text += $"\nFailed to extract the tranllation guideline for the video: {ex.Message}";
+                MessageBox.Show(ex.Message, "Failed to extract the tranllation guideline for the video", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
-            logBuilder.AppendLine("====================================================");
 
-            var analysisLog = logBuilder.ToString();
-
-            LogTextBox.Text = analysisLog;
-
-            var translationTasks = analyst.VideoAnalysis.Chapters.Select(TranslateChapter);
+            var translationTasks = analysis.Chapters.Select(TranslateChapter);
             var results = await Task.WhenAll(translationTasks);
 
             Cache.TranslatedSubtitle = results
                 .Where(r => r != null)
                 .SelectMany(subtitle => subtitle)
+                .DistinctBy(s => s.StartTime)
                 .OrderBy(subtitle => subtitle.StartTime)
                 .ToList();
 
+            var srt = new StringBuilder(Cache.TranslatedSubtitle.Count * 100);
+
+            for (int i = 0; i < Cache.TranslatedSubtitle.Count; i++)
+            {
+                srt.Append(i + 1).AppendLine()
+                   .Append(TimeSpanHelper.AsString(Cache.TranslatedSubtitle[i].StartTime))
+                   .Append(" --> ")
+                   .Append(TimeSpanHelper.AsString(Cache.TranslatedSubtitle[i].EndTime))
+                   .AppendLine()
+                   .AppendLine(Cache.TranslatedSubtitle[i].Text)
+                   .AppendLine();
+            }
+
+            LogTextBox.Text = srt.ToString();
         }
 
         private async Task<List<Subtitle>?> TranslateChapter(Chapter chapter)
         {
-            LogTextBox.Text += $"Translating chapter {chapter.StartTime} to {chapter.EndTime} . . .";
-
             try
             {
-                await Task.Delay(10);
-                var results = new List<Subtitle>();
+                var subtitles = Cache.OriginalSubtitle
+                    .Where(subtitles => TimeSpanHelper.AsTimeSpan(chapter.StartTime) <= subtitles.StartTime && subtitles.EndTime <= TimeSpanHelper.AsTimeSpan(chapter.EndTime))
+                    .ToList();
 
-                LogTextBox.Text += $"Finished translating chapter {chapter.StartTime} to {chapter.EndTime}.";
-
-                return results;
+                var translatedSubtitles = await Translator.Translator.TranslateVideo(subtitles);
+                return translatedSubtitles;
             }
             catch (Exception ex)
             {
-                LogTextBox.Text += $"Failed to translate chapter {chapter.StartTime} to {chapter.EndTime}: {ex.Message}";
+                LogTextBox.Text += $"\nFailed to translate the chapter from {chapter.StartTime} to {chapter.EndTime}: {ex.Message}";
                 return null;
             }
         }
@@ -133,10 +155,12 @@ namespace CapLingo_Lite
             if (isValidApiKey)
             {
                 MessageBox.Show("API key is valid", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Start_Btn.Enabled = true;
             }
             else
             {
                 MessageBox.Show("Invalid API key", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Start_Btn.Enabled = false;
             }
         }
     }
