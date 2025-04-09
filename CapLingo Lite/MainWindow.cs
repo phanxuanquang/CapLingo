@@ -1,4 +1,4 @@
-using Domains;
+﻿using Domains;
 using Utilities;
 
 namespace CapLingo_Lite
@@ -70,6 +70,27 @@ namespace CapLingo_Lite
             {
                 subtitles = SubtittleHelper.MinimizeDialogues(subtitles);
             }
+
+            var excludedContent = new List<string>
+            {
+                "わぁ",
+                "あぁ",
+                "はぁ",
+                "ふぅ",
+                "ふぁ",
+                "うん",
+                "あん",
+                "えっ",
+                "えぇ",
+                "うーん",
+                "おっ",
+                "っと",
+                "ウフフ",
+                "へえ",
+                "おー"
+            };
+
+            subtitles = subtitles.Where(s => !excludedContent.Contains(s.Text)).ToList();
 
             using SaveFileDialog saveFileDialog = new();
             saveFileDialog.Filter = "SRT files (*.srt)|*.srt";

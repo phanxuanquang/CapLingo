@@ -28,7 +28,7 @@ namespace Utilities
 
                 var next = subtitles[i];
 
-                if (next.StartTime.Subtract(current.EndTime).TotalMilliseconds < 25.0D)
+                if (next.StartTime.Subtract(current.EndTime).TotalMilliseconds < 20.0D)
                 {
                     current.Text = $"{current.Text}\n{next.Text}".Trim();
                     current.EndTime = next.EndTime;

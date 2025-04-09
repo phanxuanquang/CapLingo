@@ -42,22 +42,22 @@
             // SubtitleFilePath_TextBox
             // 
             SubtitleFilePath_TextBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            SubtitleFilePath_TextBox.Location = new Point(13, 0);
-            SubtitleFilePath_TextBox.Margin = new Padding(10, 5, 10, 10);
+            SubtitleFilePath_TextBox.Location = new Point(0, 0);
+            SubtitleFilePath_TextBox.Margin = new Padding(0, 0, 12, 0);
             SubtitleFilePath_TextBox.Multiline = true;
             SubtitleFilePath_TextBox.Name = "SubtitleFilePath_TextBox";
             SubtitleFilePath_TextBox.PlaceholderText = "C:\\Users\\user\\AppData\\Local\\CapCut\\User Data\\Projects\\com.lveditor.draft\\";
             SubtitleFilePath_TextBox.ReadOnly = true;
-            SubtitleFilePath_TextBox.Size = new Size(1315, 34);
+            SubtitleFilePath_TextBox.Size = new Size(900, 40);
             SubtitleFilePath_TextBox.TabIndex = 0;
             // 
             // BrowseDraftContentFile_Btn
             // 
             BrowseDraftContentFile_Btn.Dock = DockStyle.Right;
-            BrowseDraftContentFile_Btn.Location = new Point(1469, 0);
-            BrowseDraftContentFile_Btn.Margin = new Padding(10, 0, 0, 0);
+            BrowseDraftContentFile_Btn.Location = new Point(1070, 0);
+            BrowseDraftContentFile_Btn.Margin = new Padding(12, 0, 0, 0);
             BrowseDraftContentFile_Btn.Name = "BrowseDraftContentFile_Btn";
-            BrowseDraftContentFile_Btn.Size = new Size(112, 34);
+            BrowseDraftContentFile_Btn.Size = new Size(134, 41);
             BrowseDraftContentFile_Btn.TabIndex = 1;
             BrowseDraftContentFile_Btn.Text = "Browse";
             BrowseDraftContentFile_Btn.UseVisualStyleBackColor = true;
@@ -67,10 +67,12 @@
             // 
             EnableMinimizeSubtitle_Checkbox.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             EnableMinimizeSubtitle_Checkbox.AutoSize = true;
-            EnableMinimizeSubtitle_Checkbox.Enabled = false;
-            EnableMinimizeSubtitle_Checkbox.Location = new Point(37, 843);
+            EnableMinimizeSubtitle_Checkbox.Checked = true;
+            EnableMinimizeSubtitle_Checkbox.CheckState = CheckState.Checked;
+            EnableMinimizeSubtitle_Checkbox.Location = new Point(44, 591);
+            EnableMinimizeSubtitle_Checkbox.Margin = new Padding(4);
             EnableMinimizeSubtitle_Checkbox.Name = "EnableMinimizeSubtitle_Checkbox";
-            EnableMinimizeSubtitle_Checkbox.Size = new Size(186, 29);
+            EnableMinimizeSubtitle_Checkbox.Size = new Size(213, 34);
             EnableMinimizeSubtitle_Checkbox.TabIndex = 2;
             EnableMinimizeSubtitle_Checkbox.Text = "Cleanup Dialogues";
             EnableMinimizeSubtitle_Checkbox.UseVisualStyleBackColor = true;
@@ -83,38 +85,41 @@
             DialoguesTable.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             DialoguesTable.BackgroundColor = SystemColors.ControlLightLight;
             DialoguesTable.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            DialoguesTable.Location = new Point(37, 76);
+            DialoguesTable.Location = new Point(44, 91);
+            DialoguesTable.Margin = new Padding(4);
             DialoguesTable.Name = "DialoguesTable";
             DialoguesTable.ReadOnly = true;
             DialoguesTable.RowHeadersWidth = 62;
-            DialoguesTable.Size = new Size(1581, 756);
+            DialoguesTable.Size = new Size(1204, 492);
             DialoguesTable.TabIndex = 3;
             // 
             // ExportSrt_Btn
             // 
             ExportSrt_Btn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            ExportSrt_Btn.BackColor = Color.White;
             ExportSrt_Btn.Enabled = false;
             ExportSrt_Btn.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            ExportSrt_Btn.Location = new Point(375, 880);
+            ExportSrt_Btn.Location = new Point(400, 630);
+            ExportSrt_Btn.Margin = new Padding(4);
             ExportSrt_Btn.Name = "ExportSrt_Btn";
-            ExportSrt_Btn.Size = new Size(906, 55);
+            ExportSrt_Btn.Size = new Size(494, 66);
             ExportSrt_Btn.TabIndex = 4;
             ExportSrt_Btn.Text = "Export";
             ExportSrt_Btn.UseCompatibleTextRendering = true;
-            ExportSrt_Btn.UseVisualStyleBackColor = true;
+            ExportSrt_Btn.UseVisualStyleBackColor = false;
             ExportSrt_Btn.Click += ExportSrt_Btn_Click;
             // 
             // TranslateBtn
             // 
             TranslateBtn.Dock = DockStyle.Right;
-            TranslateBtn.Location = new Point(1338, 0);
-            TranslateBtn.Margin = new Padding(0, 0, 10, 0);
+            TranslateBtn.Enabled = false;
+            TranslateBtn.Location = new Point(913, 0);
+            TranslateBtn.Margin = new Padding(0, 0, 16, 0);
             TranslateBtn.Name = "TranslateBtn";
-            TranslateBtn.Size = new Size(131, 34);
+            TranslateBtn.Size = new Size(157, 41);
             TranslateBtn.TabIndex = 2;
             TranslateBtn.Text = "Translate";
             TranslateBtn.UseVisualStyleBackColor = true;
-            TranslateBtn.Visible = false;
             TranslateBtn.Click += TranslateBtn_Click;
             // 
             // panel1
@@ -123,20 +128,22 @@
             panel1.Controls.Add(TranslateBtn);
             panel1.Controls.Add(SubtitleFilePath_TextBox);
             panel1.Controls.Add(BrowseDraftContentFile_Btn);
-            panel1.Location = new Point(37, 29);
+            panel1.Location = new Point(44, 35);
+            panel1.Margin = new Padding(4);
             panel1.Name = "panel1";
-            panel1.Size = new Size(1581, 34);
+            panel1.Size = new Size(1204, 41);
             panel1.TabIndex = 6;
             // 
             // MainWindow
             // 
-            AutoScaleDimensions = new SizeF(10F, 25F);
+            AutoScaleDimensions = new SizeF(12F, 30F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1655, 965);
+            ClientSize = new Size(1293, 720);
             Controls.Add(panel1);
             Controls.Add(ExportSrt_Btn);
             Controls.Add(DialoguesTable);
             Controls.Add(EnableMinimizeSubtitle_Checkbox);
+            Margin = new Padding(4);
             Name = "MainWindow";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "CapLingo Lite";
